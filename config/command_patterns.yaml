@@ -1,0 +1,70 @@
+# Common command patterns for fallback suggestions
+powershell:
+  system_administration:
+    - pattern: "group policy|gpo"
+      command: "gpupdate /force"
+      description: "Force Group Policy update"
+      
+    - pattern: "services|running services"
+      command: "Get-Service | Where-Object {$_.Status -eq 'Running'}"
+      description: "List all running services"
+      
+    - pattern: "disk space|storage"
+      command: "Get-WmiObject -Class Win32_LogicalDisk | Select-Object DeviceID,Size,FreeSpace"
+      description: "Check disk space on all drives"
+      
+    - pattern: "processes|running processes"
+      command: "Get-Process | Sort-Object CPU -Descending"
+      description: "List running processes sorted by CPU usage"
+      
+    - pattern: "event log|events"
+      command: "Get-EventLog -LogName System -Newest 20"
+      description: "Get latest 20 system events"
+      
+    - pattern: "network|ip|adapter"
+      command: "Get-NetAdapter | Where-Object {$_.Status -eq 'Up'}"
+      description: "List active network adapters"
+      
+    - pattern: "users|logged|sessions"
+      command: "Get-WmiObject -Class Win32_LoggedOnUser"
+      description: "List logged on users"
+
+  file_operations:
+    - pattern: "create directory|new folder|mkdir"
+      command: "New-Item -ItemType Directory -Name 'NewFolder'"
+      description: "Create a new directory"
+      
+    - pattern: "copy files|copy"
+      command: "Copy-Item -Path 'source' -Destination 'destination' -Recurse"
+      description: "Copy files recursively"
+      
+    - pattern: "find files|search files"
+      command: "Get-ChildItem -Path . -Recurse -Filter '*.txt'"
+      description: "Find files with specific pattern"
+
+python:
+  development:
+    - pattern: "install package|pip install"
+      command: "pip install requests"
+      description: "Install a Python package"
+      
+    - pattern: "virtual environment|venv"
+      command: "python -m venv myenv"
+      description: "Create a virtual environment"
+      
+    - pattern: "list packages|pip list"
+      command: "pip list"
+      description: "List installed Python packages"
+      
+    - pattern: "python version"
+      command: "python --version"
+      description: "Check Python version"
+
+  data_analysis:
+    - pattern: "read csv|pandas"
+      command: "import pandas as pd; df = pd.read_csv('file.csv'); print(df.head())"
+      description: "Read and display CSV file"
+      
+    - pattern: "plot|matplotlib"
+      command: "import matplotlib.pyplot as plt; plt.plot([1,2,3,4]); plt.show()"
+      description: "Create a simple plot"
