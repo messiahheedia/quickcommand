@@ -20,21 +20,26 @@ class PowerShellHandler:
         """Check if PowerShell is available on the system."""
         try:
             # Try both pwsh (PowerShell Core) and powershell (Windows PowerShell)
-            for cmd in ['pwsh', 'powershell']:
+            for cmd in ['powershell', 'pwsh']:  # Try Windows PowerShell first
                 try:
                     result = subprocess.run(
                         [cmd, '-Command', 'Write-Host "test"'], 
                         capture_output=True, 
                         text=True, 
-                        timeout=5
+                        timeout=10,  # Increased timeout
+                        shell=False
                     )
                     if result.returncode == 0:
                         self.ps_command = cmd
+                        print(f"{Fore.GREEN}PowerShell detected: {cmd}{Style.RESET_ALL}")
                         return True
-                except (subprocess.SubprocessError, FileNotFoundError, subprocess.TimeoutExpired):
+                except (subprocess.SubprocessError, FileNotFoundError, subprocess.TimeoutExpired) as e:
+                    print(f"{Fore.YELLOW}PowerShell {cmd} not available: {e}{Style.RESET_ALL}")
                     continue
+            print(f"{Fore.RED}No PowerShell executable found{Style.RESET_ALL}")
             return False
-        except Exception:
+        except Exception as e:
+            print(f"{Fore.RED}Error checking PowerShell availability: {e}{Style.RESET_ALL}")
             return False
     
     def execute(self, command: str) -> None:
@@ -49,38 +54,27 @@ class PowerShellHandler:
             return
         
         try:
-            print(f"{Fore.CYAN}Executing in PowerShell:{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}Executing in PowerShell ({self.ps_command}):{Style.RESET_ALL}")
             print(f"{Fore.YELLOW}> {command}{Style.RESET_ALL}\n")
             
-            # Execute the command
-            process = subprocess.Popen(
+            # Execute the command using a simpler approach
+            result = subprocess.run(
                 [self.ps_command, '-Command', command],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 text=True,
+                timeout=30,
                 shell=False
             )
             
-            # Stream output in real-time
-            while True:
-                output = process.stdout.readline()
-                if output == '' and process.poll() is not None:
-                    break
-                if output:
-                    print(output.strip())
-            
-            # Get any remaining output and errors
-            stdout, stderr = process.communicate()
-            
-            # Print any remaining output
-            if stdout:
-                print(stdout.strip())
+            # Print output
+            if result.stdout:
+                print(result.stdout.strip())
             
             # Handle errors
-            if process.returncode != 0:
-                print(f"\n{Fore.RED}Command failed with exit code {process.returncode}:{Style.RESET_ALL}")
-                if stderr:
-                    print(f"{Fore.RED}{stderr.strip()}{Style.RESET_ALL}")
+            if result.returncode != 0:
+                print(f"\n{Fore.RED}Command failed with exit code {result.returncode}:{Style.RESET_ALL}")
+                if result.stderr:
+                    print(f"{Fore.RED}{result.stderr.strip()}{Style.RESET_ALL}")
             else:
                 print(f"\n{Fore.GREEN}Command completed successfully.{Style.RESET_ALL}")
                 

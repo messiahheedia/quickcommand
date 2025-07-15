@@ -192,6 +192,10 @@ class QuickCommand:
     def execute_command(self, command: str):
         """Execute the approved command."""
         try:
+            print(f"{Fore.BLUE}Debug: Executing command: {command}{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}Debug: Default shell: {self.settings.default_shell}{Style.RESET_ALL}")
+            print(f"{Fore.BLUE}Debug: PowerShell available: {self.powershell.is_available}{Style.RESET_ALL}")
+            
             if self.settings.default_shell == "powershell":
                 self.powershell.execute(command)
             elif self.settings.default_shell == "python":
